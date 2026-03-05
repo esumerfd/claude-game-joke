@@ -40,7 +40,11 @@ claude plugin marketplace add git@github.com:esumerfd/claude-game-joke.git
 claude plugin install game-joke
 ```
 
-### 2. Start the Game
+### 2. Restart Claude
+
+After installing the plugin, **restart Claude Code** so it picks up the new skill.
+
+### 3. Start the Game
 
 ```
 /game-joke:play
@@ -48,7 +52,7 @@ claude plugin install game-joke
 
 This launches the game server on `http://localhost:7331` and gives Claude the challenge prompt.
 
-### 3. Find The Joke
+### 4. Find The Joke
 
 The joke is split into **6 puzzles**, each hiding one or more words. They escalate in difficulty:
 
@@ -61,7 +65,7 @@ The joke is split into **6 puzzles**, each hiding one or more words. They escala
 | 5 | Medium | Sometimes the mistakes ARE the message |
 | 6 | Hard | Some things only make sense when you run them |
 
-### 4. Assemble & Verify
+### 5. Assemble & Verify
 
 Once you think you've found all the words, put the joke together. You'll know when you've got it — it's a proper joke with a punchline.
 

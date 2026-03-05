@@ -1,0 +1,238 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Courier New", monospace;
+  background: #0a0a0f;
+  color: #c0c0c0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* --- Shimmer Effect --- */
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { text-shadow: 0 0 10px rgba(138, 43, 226, 0.3); }
+  50% { text-shadow: 0 0 25px rgba(138, 43, 226, 0.7), 0 0 50px rgba(138, 43, 226, 0.3); }
+}
+
+@keyframes taunt-slide {
+  0% { opacity: 0; transform: translateX(-20px); }
+  10% { opacity: 1; transform: translateX(0); }
+  90% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(20px); }
+}
+
+/* --- Layout --- */
+
+.game-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* --- Header --- */
+
+.game-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 3rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(
+    90deg,
+    #8a2be2,
+    #ff6ec7,
+    #00ffff,
+    #8a2be2,
+    #ff6ec7
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+
+.game-subtitle {
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 3rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* --- Taunting Joker --- */
+
+.joker-container {
+  position: relative;
+  margin: 2rem 0;
+  animation: float 3s ease-in-out infinite;
+}
+
+.joker {
+  font-size: 6rem;
+  text-align: center;
+  animation: pulse-glow 2s ease-in-out infinite;
+  cursor: default;
+  user-select: none;
+}
+
+.joker-speech {
+  position: absolute;
+  top: -2rem;
+  right: -10rem;
+  background: #1a1a2e;
+  border: 1px solid #8a2be233;
+  border-radius: 12px;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  color: #ff6ec7;
+  white-space: nowrap;
+  opacity: 0;
+}
+
+.joker-speech.visible {
+  animation: taunt-slide 4s ease-in-out forwards;
+}
+
+/* --- Challenge Card --- */
+
+.challenge-card {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid #8a2be233;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 100%;
+  margin: 2rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.challenge-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #8a2be2, transparent);
+  animation: shimmer 3s linear infinite;
+}
+
+.challenge-card h2 {
+  color: #ff6ec7;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  letter-spacing: 0.1em;
+}
+
+.challenge-card p {
+  line-height: 1.8;
+  color: #a0a0b0;
+}
+
+.challenge-card strong {
+  color: #00ffff;
+}
+
+/* --- Progress Tracker --- */
+
+.progress-section {
+  width: 100%;
+  margin: 2rem 0;
+}
+
+.progress-title {
+  text-align: center;
+  color: #666;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.progress-track {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.progress-pip {
+  flex: 1;
+  height: 4px;
+  background: #1a1a2e;
+  border-radius: 2px;
+  transition: background 0.5s ease, box-shadow 0.5s ease;
+}
+
+.progress-pip.completed {
+  background: #8a2be2;
+  box-shadow: 0 0 8px rgba(138, 43, 226, 0.5);
+}
+
+.progress-pip.current {
+  background: #ff6ec7;
+  box-shadow: 0 0 12px rgba(255, 110, 199, 0.5);
+}
+
+/* --- Rules --- */
+
+.rules-list {
+  width: 100%;
+  margin: 1rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rules-list li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  color: #808090;
+  font-size: 0.9rem;
+}
+
+.rules-list li::before {
+  content: ">";
+  position: absolute;
+  left: 0;
+  color: #8a2be2;
+}
+
+/* --- Footer --- */
+
+.footer {
+  margin-top: auto;
+  padding: 2rem 0;
+  text-align: center;
+  color: #333;
+  font-size: 0.75rem;
+}
+
+.footer a {
+  color: #555;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: #8a2be2;
+}

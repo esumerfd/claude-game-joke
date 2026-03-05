@@ -10,7 +10,7 @@
   "plugins": [
     {
       "name": "game-joke",
-      "source": "./plugins/games/game-joke",
+      "source": "./plugins/game-joke",
       "description": "A puzzle game that challenges Claude to find the words of a joke hidden across a web server",
       "version": "0.1.0",
       "category": "games",

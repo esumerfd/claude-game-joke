@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Game: The Joke</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<!-- First word: >>> Those <<< -->
+<body>
+  <div class="game-container">
+
+    <h1 class="game-title">The Joke</h1>
+    <p class="game-subtitle">A puzzle game for Claude</p>
+
+    <div class="joker-container">
+      <div class="joker">&#x1F0CF;</div>
+      <div class="joker-speech" id="joker-speech"></div>
+    </div>
+
+    <div class="challenge-card">
+      <h2>// YOUR MISSION</h2>
+      <p>
+        A joke has been split into pieces and scattered across this server &mdash;
+        hidden in the page, the APIs, the files, and the code.
+      </p>
+      <p>
+        <strong>Find every word. Reassemble the punchline.</strong>
+      </p>
+      <p>
+        You may only use Claude to explore. No dev tools. No peeking.
+        Just you and your AI, hunting through the dark.
+      </p>
+    </div>
+
+    <div class="progress-section">
+      <div class="progress-title">Puzzle Progress</div>
+      <div class="progress-track" id="progress-track">
+        <div class="progress-pip" data-puzzle="1"></div>
+        <div class="progress-pip" data-puzzle="2"></div>
+        <div class="progress-pip" data-puzzle="3"></div>
+        <div class="progress-pip" data-puzzle="4"></div>
+        <div class="progress-pip" data-puzzle="5"></div>
+        <div class="progress-pip" data-puzzle="6"></div>
+      </div>
+    </div>
+
+    <div class="challenge-card">
+      <h2>// RULES OF ENGAGEMENT</h2>
+      <ul class="rules-list">
+        <li>There are <strong>6 puzzles</strong>, each hiding one or more words of the joke.</li>
+        <li>The puzzles escalate in difficulty. The first is a gift. The last is not.</li>
+        <li>Not everything on this server is a clue. Some things exist purely to waste your time.</li>
+        <li>If Claude starts writing poetry, it has fallen into a trap.</li>
+        <li>When you have the full joke, you will know. It has a punchline.</li>
+      </ul>
+    </div>
+
+    <footer class="footer">
+      <a href="https://github.com/esumerfd/claude-game-joke">github.com/esumerfd/claude-game-joke</a>
+    </footer>
+
+  </div>
+
+  <script>
+    const TAUNTS = [
+      "Still looking?",
+      "Getting warmer... just kidding.",
+      "The answer is right here. Somewhere.",
+      "Have you tried asking nicely?",
+      "I know something you don't.",
+      "Tick tock.",
+      "That's not it either.",
+      "You're overthinking this.",
+      "Or are you underthinking it?",
+      "I'll never tell.",
+      "Wrong way.",
+      "Closer... no wait, farther.",
+      "The joker always wins.",
+    ];
+
+    const speech = document.getElementById("joker-speech");
+    let tauntIndex = 0;
+
+    function showTaunt() {
+      speech.classList.remove("visible");
+      speech.textContent = TAUNTS[tauntIndex];
+      tauntIndex = (tauntIndex + 1) % TAUNTS.length;
+
+      requestAnimationFrame(() => {
+        speech.classList.add("visible");
+      });
+
+      speech.addEventListener("animationend", () => {
+        speech.classList.remove("visible");
+      }, { once: true });
+    }
+
+    showTaunt();
+    setInterval(showTaunt, 6000);
+
+    async function loadProgress() {
+      try {
+        const res = await fetch("/api/session");
+        const data = await res.json();
+        updateProgress(data.stage);
+      } catch (_) {
+        updateProgress(1);
+      }
+    }
+
+    function updateProgress(stage) {
+      const pips = document.querySelectorAll(".progress-pip");
+      pips.forEach((pip) => {
+        const puzzle = parseInt(pip.dataset.puzzle, 10);
+        pip.classList.remove("completed", "current");
+        if (puzzle < stage) pip.classList.add("completed");
+        if (puzzle === stage) pip.classList.add("current");
+      });
+    }
+
+    loadProgress();
+  </script>
+</body>
+</html>
