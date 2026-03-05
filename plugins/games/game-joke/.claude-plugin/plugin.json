@@ -1,0 +1,7 @@
+{
+  "name": "game-joke",
+  "description": "A puzzle game that challenges Claude to find the words of a joke hidden across a web server",
+  "author": {
+    "name": "esumerfd"
+  }
+}

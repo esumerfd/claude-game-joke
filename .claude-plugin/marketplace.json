@@ -1,0 +1,26 @@
+{
+  "name": "claude-game-joke",
+  "owner": {
+    "name": "esumerfd"
+  },
+  "metadata": {
+    "description": "Puzzle games for Claude users",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "game-joke",
+      "source": "./plugins/games/game-joke",
+      "description": "A puzzle game that challenges Claude to find the words of a joke hidden across a web server",
+      "version": "0.1.0",
+      "category": "games",
+      "keywords": [
+        "game",
+        "puzzle",
+        "challenge",
+        "joke",
+        "fun"
+      ]
+    }
+  ]
+}
