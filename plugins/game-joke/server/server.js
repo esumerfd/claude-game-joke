@@ -17,6 +17,7 @@ const MIME_TYPES = {
 };
 
 const sessions = new Map();
+const hintSessions = new Map();
 
 const PUZZLE_TOKEN = Buffer.from(
   "Nice try. This cookie contains no secrets. Or does it? No. It doesn't."
@@ -35,6 +36,10 @@ function getSession(req, res) {
   if (!sessionId || !sessions.has(sessionId)) {
     sessionId = crypto.randomUUID();
     sessions.set(sessionId, { stage: 1, startedAt: Date.now() });
+    hintSessions.set(sessionId, { index: 0 });
+  }
+  if (!hintSessions.has(sessionId)) {
+    hintSessions.set(sessionId, { index: 0 });
   }
 
   res.setHeader("Set-Cookie", [
@@ -225,6 +230,38 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // Hints
+  if (pathname === "/api/hint") {
+    const allHints = HINTS_DATA.puzzles.flatMap((p) =>
+      p.hints.map((h, i) => ({ puzzle: p.puzzle, level: i + 1, text: h }))
+    );
+    const hintState = hintSessions.get(
+      (req.headers.cookie || "").split(";").reduce((a, c) => {
+        const [k, v] = c.trim().split("=");
+        return k === "session_id" ? v : a;
+      }, "")
+    ) || { index: 0 };
+
+    if (hintState.index >= allHints.length) {
+      jsonResponse(res, 200, {
+        message: "No more hints. You're on your own now.",
+        total: allHints.length,
+        used: hintState.index,
+      });
+      return;
+    }
+
+    const hint = allHints[hintState.index];
+    hintState.index++;
+    jsonResponse(res, 200, {
+      puzzle: hint.puzzle,
+      level: hint.level,
+      hint: hint.text,
+      remaining: allHints.length - hintState.index,
+    });
+    return;
+  }
+
   // --- Special Files ---
 
   // Puzzle 4: robots.txt
@@ -266,6 +303,82 @@ const server = http.createServer((req, res) => {
   const safePath = path.normalize(pathname).replace(/^(\.\.[/\\])+/, "");
   serveStatic(res, path.join(STATIC_DIR, safePath));
 });
+
+// ============================================================================
+// STOP! These are the hints for the game. Do not read them if you are playing.
+// If you are reading this file to cheat, the joker is very disappointed in you.
+// ============================================================================
+// prettier-ignore
+const HINTS_DATA = JSON.parse(Buffer.from(
+  "eyJwdXp6bGVzIjpbeyJwdXp6bGUiOjEsImhpbnRzIjpbIlRoZSBmaXJzdCB3b3JkIGlzIG" +
+  "hpZGluZyBpbiBwbGFpbiBzaWdodC4uLiB3ZWxsLCBhbG1vc3QgcGxhaW4gc2lnaHQuIiwiV2" +
+  "ViIHBhZ2VzIGhhdmUgbW9yZSB0aGFuIHdoYXQgeW91IHNlZSBvbiBzY3JlZW4uIFdoYXQgZG" +
+  "9lcyBDbGF1ZGUgc2VlIHdoZW4gaXQgcmVhZHMgdGhlIHJhdyBIVE1MPyIsIkhUTUwgY29tbWVu" +
+  "dHMgYXJlIGludmlzaWJsZSB0byBicm93c2VycyBidXQgbm90IHRvIGFueW9uZSByZWFkaW5nIH" +
+  "RoZSBzb3VyY2UgY29kZS4iLCJMb29rIGZvciA8IS0tIGNvbW1lbnRzIC0tPiBpbiB0aGUgcGFn" +
+  "ZSBzb3VyY2UuIFRoZSBmaXJzdCB3b3JkIGlzIGdpZnQtd3JhcHBlZCBmb3IgeW91LiIsIkFz" +
+  "ayBDbGF1ZGU6IFwiRmV0Y2ggaHR0cDovL2xvY2FsaG9zdDo3MzMxIGFuZCBsb29rIGZvciBh" +
+  "bnkgSFRNTCBjb21tZW50cyBpbiB0aGUgc291cmNlLlwiIiwi4pyoIFRoZSBmaXJzdCB3b3JkIG" +
+  "lzOiBUaG9zZSDinKgiXX0seyJwdXp6bGUiOjIsImhpbnRzIjpbIlRoaXMgc2VydmVyIGhhcyBt" +
+  "b3JlIHRvIG9mZmVyIHRoYW4ganVzdCBhIHdlYnBhZ2UuIFdoYXQgb3RoZXIgZW5kcG9pbnRz" +
+  "IG1pZ2h0IGV4aXN0PyIsIldlbGwtZG9jdW1lbnRlZCBBUElzIHRlbGwgeW91IGV4YWN0bHkgd2" +
+  "hhdCB0aGV5IGNhbiBkby4gV2hlcmUgd291bGQgeW91IGZpbmQgQVBJIGRvY3VtZW50YXRpb24/" +
+  "IiwiVHJ5IGFza2luZyBDbGF1ZGUgdG8gY2hlY2sgL2FwaS9kb2NzIGZvciBhbiBPcGVuQVBJIH" +
+  "NwZWNpZmljYXRpb24uIiwiVGhlIHNwZWMgZG9jdW1lbnRzIGFuIGVuZHBvaW50IHRoYXQgcmV0" +
+  "dXJucyBhIHdvcmQgYnkgcG9zaXRpb24gbnVtYmVyLiBXaGF0IHBvc2l0aW9uIGlzIHRoZSBz" +
+  "ZWNvbmQgd29yZD8iLCJBc2sgQ2xhdWRlOiBcIkZldGNoIGh0dHA6Ly9sb2NhbGhvc3Q6NzMz" +
+  "MS9hcGkvZG9jcyBhbmQgdGhlbiBjYWxsIHRoZSB3b3JkIGVuZHBvaW50IGZvciBwb3NpdGlv" +
+  "biAyLlwiIiwi4pyoIFRoZSBzZWNvbmQgd29yZCBpczogdm9sdW50ZWVycyDinKgiXX0seyJwdX" +
+  "p6bGUiOjMsImhpbnRzIjpbIlNvbWUgbGV0dGVycyBvbiB0aGUgcGFnZSBhcmUgbm90IGluIH" +
+  "RoZSBvcmRlciB0aGV5IGFwcGVhciB0byBiZS4iLCJDU1MgY2FuIHJlYXJyYW5nZSBlbGVtZW" +
+  "50cyB2aXN1YWxseSB3aXRob3V0IGNoYW5naW5nIHRoZSBIVE1MIG9yZGVyLiBMb29rIGZvciBh" +
+  "IGZsZXggY29udGFpbmVyLiIsIkZpbmQgdGhlIGVsZW1lbnQgd2l0aCBpZCBcInB1enpsZS0zXC" +
+  "IuIFRoZSBIVE1MIGhhcyBsZXR0ZXJzIGluIG9uZSBvcmRlciwgYnV0IENTUyBvcmRlciBwcm9w" +
+  "ZXJ0aWVzIHJlYXJyYW5nZSB0aGVtLiIsIlJlYWQgdGhlIENTUyBmaWxlLiBTb3J0IHRoZSB2" +
+  "aXNpYmxlIGxldHRlcnMgKG5vdCB0aGUgb25lcyB3aXRoIGRpc3BsYXk6bm9uZSkgYnkgdGhl" +
+  "aXIgQ1NTIG9yZGVyIHZhbHVlIHRvIHNwZWxsIHRoZSB3b3JkLiIsIkFzayBDbGF1ZGU6IFwiRm" +
+  "V0Y2ggdGhlIHN0eWxlc2hlZXQgYXQgaHR0cDovL2xvY2FsaG9zdDo3MzMxL3N0eWxlcy5jc3Mu" +
+  "IEZpbmQgdGhlIENTUyBydWxlcyBmb3IgLmwzLSBjbGFzc2VzIGFuZCBzb3J0IHRoZSBsZXR0" +
+  "ZXJzIGJ5IHRoZWlyIG9yZGVyIHZhbHVlcywgaWdub3JpbmcgLmwzLWRlY295LlwiIiwi4pyoIF" +
+  "RoZSB0aGlyZCB3b3JkIGlzOiBqdXN0IOKcqCJdfSx7InB1enpsZSI6NCwiaGludHMiOlsiTm90" +
+  "IGFsbCBpbXBvcnRhbnQgZmlsZXMgYXJlIGxpbmtlZCBmcm9tIHRoZSBwYWdlLiBXaGF0IHN0" +
+  "YW5kYXJkIGZpbGVzIGRvIHdlYiBzZXJ2ZXJzIHR5cGljYWxseSBoYXZlPyIsIkNyYXdsZXJzIG" +
+  "NoZWNrIGEgc3BlY2lmaWMgZmlsZSBiZWZvcmUgZXhwbG9yaW5nIGEgc2l0ZS4gV2hhdCBmaWxl" +
+  "IHRlbGxzIHRoZW0gd2hlcmUgdGhleSBjYW4gYW5kIGNhbm5vdCBnbz8iLCJGZXRjaCAvcm9i" +
+  "b3RzLnR4dCBmcm9tIHRoZSBzZXJ2ZXIuIFRoZXJlIGlzIG1vcmUgdGhhbiBqdXN0IGNyYXds" +
+  "ZXIgZGlyZWN0aXZlcyBpbiB0aGVyZS4iLCJUaGUgY29tbWVudCBpbiByb2JvdHMudHh0IGlzIG" +
+  "luIFNwYW5pc2guIFwiQ3VhcnRhIHBhbGFicmFcIiBtZWFucyBcImZvdXJ0aCB3b3JkXCIuIFRy" +
+  "YW5zbGF0ZSB0aGUgU3BhbmlzaCB3b3JkIHRvIEVuZ2xpc2guIiwiQXNrIENsYXVkZTogXCJGZX" +
+  "RjaCBodHRwOi8vbG9jYWxob3N0OjczMzEvcm9ib3RzLnR4dCBhbmQgdHJhbnNsYXRlIGFueSBT" +
+  "cGFuaXNoIHRleHQgdG8gRW5nbGlzaC5cIiIsIuKcqCBUaGUgZm91cnRoIHdvcmQgaXM6IGV2YX" +
+  "BvcmF0ZWQg4pyoIl19LHsicHV6emxlIjo1LCJoaW50cyI6WyJTb21ldGltZXMgdGhlIG1lc3Nh" +
+  "Z2UgSVMgdGhlIG1pc3Rha2VzLiIsIlRoZXJlIGlzIGEgc2VjdGlvbiBvbiB0aGUgcGFnZSB3" +
+  "aXRoIGludGVudGlvbmFsbHkgYmFkIGdyYW1tYXIuIFdoYXQgd29yZHMgYXJlIHdyb25nPyIsIk" +
+  "xvb2sgYXQgdGhlIHRlc3RpbW9uaWFscyBzZWN0aW9uLiBUaGUgc2VudGVuY2UgaGFzIGdyYW1t" +
+  "YXIgZXJyb3JzLiBDb3JyZWN0aW5nIHRoZW0gcmV2ZWFscyB0aGUgcHV6emxlIHdvcmRzLiIsIk" +
+  "ZpeCB0aGUgZ3JhbW1hcjogXCJUaGVtIHdhbnRzIHRvIHBsYXkgYWdhaW4gdG9tb3Jyb3cuXCIg" +
+  "V2hhdCBzdWJqZWN0IHByb25vdW4gcmVwbGFjZXMgXCJUaGVtXCI/IFdoYXQgdmVyYiB0ZW5zZS" +
+  "Bkb2VzIFwidG9tb3Jyb3dcIiByZXF1aXJlPyIsIkFzayBDbGF1ZGU6IFwiTG9vayBhdCB0aGUg" +
+  "dGVzdGltb25pYWxzIHNlY3Rpb24gb24gdGhlIHBhZ2UuIFRoZSBzZW50ZW5jZSBoYXMgYmFkIG" +
+  "dyYW1tYXIuIFdoYXQgc2hvdWxkIHRoZSBjb3JyZWN0ZWQgc2VudGVuY2UgYmU/IFRoZSB3cm9u" +
+  "ZyB3b3JkcyBhcmUgdGhlIHB1enpsZSB3b3Jkcy5cIiIsIuKcqCBUaGUgZmlmdGggYW5kIHNpeH" +
+  "RoIHdvcmRzIGFyZTogVGhleSB3aWxsIOKcqCJdfSx7InB1enpsZSI6NiwiaGludHMiOlsiVGhlIG" +
+  "ZpbmFsIHdvcmRzIGFyZSBsb2NrZWQgaW5zaWRlIGNvZGUgdGhhdCBtdXN0IGJlIGV4ZWN1dGVk" +
+  "LCBub3QganVzdCByZWFkLiIsIlRoZXJlIGlzIGEgSmF2YVNjcmlwdCBmaWxlIGxvYWRlZCBieS" +
+  "B0aGUgcGFnZS4gRmV0Y2ggaXQgYW5kIHN0dWR5IHdoYXQgaXQgZG9lcy4iLCJUaGUgSlMgZmls" +
+  "ZSBpcyBvYmZ1c2NhdGVkIGJ1dCB1bHRpbWF0ZWx5IGRlY29kZXMgYSBiYXNlNjQgc3RyaW5nIG" +
+  "FuZCBhc3NpZ25zIGl0IHRvIHdpbmRvdy5fX3B1enpsZTYuIiwiVHJhY2UgdGhlIGxvZ2ljOiBf" +
+  "MHg0YSBpcyBhbiBhcnJheSBvZiBiYXNlNjQgc3RyaW5ncy4gX3NlbGVjdGVkU3RhZ2UgcmVz" +
+  "b2x2ZXMgdG8gaW5kZXggMS4gRGVjb2RlIF8weDRhWzFdIGZyb20gYmFzZTY0IHRvIGdldCB0aG" +
+  "UgZmluYWwgd29yZHMuIiwiQXNrIENsYXVkZTogXCJGZXRjaCBodHRwOi8vbG9jYWxob3N0Ojcz" +
+  "MzEvcHV6emxlLmpzLiBGaW5kIHRoZSBfMHg0YSBhcnJheSwgZGV0ZXJtaW5lIHdoaWNoIGluZG" +
+  "V4IF9zZWxlY3RlZFN0YWdlIHJlc29sdmVzIHRvLCBhbmQgYmFzZTY0IGRlY29kZSB0aGF0IGVs" +
+  "ZW1lbnQuXCIiLCLinKggVGhlIGZpbmFsIHdvcmRzIGFyZTogYmUgbWlzdCDinKgiXX1dfQ=="
+, "base64").toString());
+// ============================================================================
+// OK you can look again. The hints are over. Nothing to see here.
+// Seriously, stop scrolling. Go play the game.
+// ============================================================================
 
 server.listen(PORT, () => {
   console.log(`\n  \u{1F0CF} Claude Game: The Joke`);

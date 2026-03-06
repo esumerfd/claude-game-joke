@@ -325,6 +325,226 @@ body {
   color: #8a2be2;
 }
 
+/* --- Hint Box (top-right trigger) --- */
+
+@keyframes hint-sparkle {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.1) rotate(-5deg); }
+  75% { transform: scale(1.1) rotate(5deg); }
+}
+
+.hint-box {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid #8a2be244;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  z-index: 100;
+}
+
+.hint-box:hover {
+  border-color: #ff6ec7;
+  box-shadow: 0 0 20px rgba(255, 110, 199, 0.3);
+}
+
+.hint-box:hover .hint-box-icon {
+  animation: hint-sparkle 0.6s ease-in-out;
+}
+
+.hint-box-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.hint-box-label {
+  font-size: 0.55rem;
+  color: #fff;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* --- First-time confirmation overlay --- */
+
+.hint-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.hint-overlay.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.hint-card {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid #8a2be244;
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 450px;
+  width: 90%;
+}
+
+.hint-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.hint-title {
+  color: #ff6ec7;
+  font-size: 1.1rem;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+}
+
+.hint-close {
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.hint-close:hover {
+  color: #ff6ec7;
+}
+
+.hint-body p {
+  color: #a0a0b0;
+  line-height: 1.7;
+  margin-bottom: 0.5rem;
+  font-family: "Courier New", monospace;
+  font-size: 0.9rem;
+}
+
+.hint-warning {
+  color: #ff6ec7 !important;
+  font-style: italic;
+}
+
+.hint-reveal-btn {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 1.5rem;
+  background: #8a2be2;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: "Courier New", monospace;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.hint-reveal-btn:hover {
+  background: #9b30ff;
+}
+
+/* --- Hint History Panel (right side) --- */
+
+@keyframes hint-slide-in {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hint-panel {
+  position: fixed;
+  top: 5rem;
+  right: 1.5rem;
+  width: 280px;
+  max-height: calc(100vh - 7rem);
+  display: none;
+  flex-direction: column;
+  z-index: 90;
+}
+
+.hint-panel.visible {
+  display: flex;
+}
+
+.hint-panel-header {
+  color: #555;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  padding-left: 0.25rem;
+}
+
+.hint-panel-list {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: #8a2be233 transparent;
+}
+
+.hint-panel-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.hint-panel-list::-webkit-scrollbar-thumb {
+  background: #8a2be233;
+  border-radius: 2px;
+}
+
+.hint-entry {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid #8a2be222;
+  border-radius: 8px;
+  padding: 0.75rem;
+  animation: hint-slide-in 0.3s ease-out;
+  transition: opacity 0.3s;
+}
+
+.hint-entry-new {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.hint-entry-label {
+  color: #ff6ec7;
+  font-size: 0.7rem;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.hint-entry-text {
+  color: #a0a0b0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.hint-entry-remaining {
+  color: #444;
+  font-size: 0.65rem;
+  margin-top: 0.35rem;
+  text-align: right;
+}
+
 /* --- Footer --- */
 
 .footer {

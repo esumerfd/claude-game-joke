@@ -8,6 +8,33 @@
 </head>
 <!-- First word: >>> Those <<< -->
 <body>
+  <!-- Hint Box (top-right trigger) -->
+  <div class="hint-box" id="hint-box" title="Need a hint?">
+    <div class="hint-box-icon">&#x2728;</div>
+    <div class="hint-box-label">Hint</div>
+  </div>
+
+  <!-- First-time confirmation overlay -->
+  <div class="hint-overlay" id="hint-overlay">
+    <div class="hint-card">
+      <div class="hint-header">
+        <span class="hint-title">Are you sure?</span>
+        <button class="hint-close" id="hint-close">&times;</button>
+      </div>
+      <div class="hint-body">
+        <p>Hints make the joker sad. Each click of the &#x2728; box reveals a progressively bigger clue.</p>
+        <p class="hint-warning">There's no going back.</p>
+      </div>
+      <button class="hint-reveal-btn" id="hint-confirm-btn">I understand, show hints</button>
+    </div>
+  </div>
+
+  <!-- Hint history panel (right side) -->
+  <div class="hint-panel" id="hint-panel">
+    <div class="hint-panel-header">Hints</div>
+    <div class="hint-panel-list" id="hint-panel-list"></div>
+  </div>
+
   <div class="game-container">
 
     <h1 class="game-title">The Joke</h1>
@@ -164,6 +191,93 @@
     }
 
     loadProgress();
+
+    // --- Hint System ---
+    (function() {
+      const hintBox = document.getElementById("hint-box");
+      const overlay = document.getElementById("hint-overlay");
+      const closeBtn = document.getElementById("hint-close");
+      const confirmBtn = document.getElementById("hint-confirm-btn");
+      const panel = document.getElementById("hint-panel");
+      const panelList = document.getElementById("hint-panel-list");
+      let activated = false;
+      let fetching = false;
+      let exhausted = false;
+
+      hintBox.addEventListener("click", async () => {
+        if (!activated) {
+          overlay.classList.add("visible");
+          return;
+        }
+        await fetchHint();
+      });
+
+      closeBtn.addEventListener("click", () => {
+        overlay.classList.remove("visible");
+      });
+
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) overlay.classList.remove("visible");
+      });
+
+      confirmBtn.addEventListener("click", async () => {
+        activated = true;
+        overlay.classList.remove("visible");
+        panel.classList.add("visible");
+        await fetchHint();
+      });
+
+      async function fetchHint() {
+        if (fetching || exhausted) return;
+        fetching = true;
+
+        try {
+          const res = await fetch("/api/hint");
+          const data = await res.json();
+
+          if (data.message) {
+            exhausted = true;
+            addToPanel(null, null, data.message);
+          } else {
+            addToPanel(data.puzzle, data.level, data.hint, data.remaining);
+          }
+        } catch (_) {
+          addToPanel(null, null, "Could not load hint. Is the server running?");
+        }
+
+        fetching = false;
+      }
+
+      function addToPanel(puzzle, level, text, remaining) {
+        const entry = document.createElement("div");
+        entry.className = "hint-entry hint-entry-new";
+
+        if (puzzle) {
+          const label = document.createElement("div");
+          label.className = "hint-entry-label";
+          label.textContent = "Puzzle " + puzzle + " \u2014 Hint " + level;
+          entry.appendChild(label);
+        }
+
+        const body = document.createElement("div");
+        body.className = "hint-entry-text";
+        body.textContent = text;
+        entry.appendChild(body);
+
+        if (remaining !== undefined) {
+          const rem = document.createElement("div");
+          rem.className = "hint-entry-remaining";
+          rem.textContent = remaining + " remaining";
+          entry.appendChild(rem);
+        }
+
+        panelList.prepend(entry);
+
+        requestAnimationFrame(() => {
+          entry.classList.remove("hint-entry-new");
+        });
+      }
+    })();
 
     // --- Red herring: Canvas gradient that looks like encoded text ---
     (function() {
