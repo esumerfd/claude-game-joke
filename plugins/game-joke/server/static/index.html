@@ -33,6 +33,45 @@
       </p>
     </div>
 
+    <!-- Red herring: The Eternal Dice -->
+    <div class="dice-container">
+      <div class="dice-label">Lucky Number</div>
+      <div class="dice" id="eternal-dice">
+        <div class="dice-face dice-front">1</div>
+        <div class="dice-face dice-back">6</div>
+        <div class="dice-face dice-right">3</div>
+        <div class="dice-face dice-left">4</div>
+        <div class="dice-face dice-top">2</div>
+        <div class="dice-face dice-bottom">5</div>
+      </div>
+    </div>
+
+    <!-- Puzzle 3: CSS letter reconstruction -->
+    <div class="challenge-card">
+      <h2>// FRAGMENTS</h2>
+      <div id="puzzle-3" class="letter-grid">
+        <span class="l3-s">s</span>
+        <span class="l3-decoy">x</span>
+        <span class="l3-j">j</span>
+        <span class="l3-t">t</span>
+        <span class="l3-decoy">q</span>
+        <span class="l3-u">u</span>
+        <span class="l3-decoy">m</span>
+      </div>
+    </div>
+
+    <!-- Puzzle 5: Grammar correction -->
+    <div class="challenge-card" data-hint="fix the grammar">
+      <h2>// TESTIMONIALS</h2>
+      <blockquote class="testimonial">
+        &ldquo;Them wants to play again tomorrow.&rdquo;
+        <cite>&mdash; A previous contestant</cite>
+      </blockquote>
+    </div>
+
+    <!-- Red herring: Hidden Canvas -->
+    <canvas id="secret-message" data-encoded="true" width="400" height="60"></canvas>
+
     <div class="progress-section">
       <div class="progress-title">Puzzle Progress</div>
       <div class="progress-track" id="progress-track">
@@ -62,7 +101,11 @@
 
   </div>
 
+  <!-- Puzzle 6: Obfuscated JS -->
+  <script src="/puzzle.js"></script>
+
   <script>
+    // --- Taunting Joker ---
     const TAUNTS = [
       "Still looking?",
       "Getting warmer... just kidding.",
@@ -99,6 +142,7 @@
     showTaunt();
     setInterval(showTaunt, 6000);
 
+    // --- Progress Tracker ---
     async function loadProgress() {
       try {
         const res = await fetch("/api/session");
@@ -120,6 +164,33 @@
     }
 
     loadProgress();
+
+    // --- Red herring: Canvas gradient that looks like encoded text ---
+    (function() {
+      const canvas = document.getElementById("secret-message");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      let offset = 0;
+
+      function draw() {
+        offset += 0.005;
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+        gradient.addColorStop(0, `hsl(${(offset * 60) % 360}, 50%, 10%)`);
+        gradient.addColorStop(0.5, `hsl(${(offset * 60 + 120) % 360}, 50%, 15%)`);
+        gradient.addColorStop(1, `hsl(${(offset * 60 + 240) % 360}, 50%, 10%)`);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = `rgba(138, 43, 226, ${0.03 + Math.sin(offset) * 0.02})`;
+        ctx.font = "10px monospace";
+        for (let i = 0; i < 40; i++) {
+          const char = String.fromCharCode(33 + ((i * 7 + Math.floor(offset * 10)) % 94));
+          ctx.fillText(char, i * 10, 30 + Math.sin(offset + i * 0.3) * 10);
+        }
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
   </script>
 </body>
 </html>
