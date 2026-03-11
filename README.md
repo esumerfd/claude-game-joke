@@ -31,30 +31,62 @@ The catch? **You can only use Claude to find them.**
 
 No peeking at source code yourself. No browser dev tools. No curl from your terminal. Just you, Claude, and your wits.
 
+## Prerequisites
+
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI installed
+- [Node.js](https://nodejs.org/) (for the game server)
+- Agent teams enabled:
+  ```bash
+  export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
+  ```
+
 ## How To Play
 
-### 1. Install the Plugin
+### 1. Add the marketplace
+
+Register the game's plugin marketplace with Claude Code:
 
 ```bash
 claude plugin marketplace add git@github.com:esumerfd/claude-game-joke.git
+```
+
+### 2. Install the plugin
+
+```bash
 claude plugin install game-joke
 ```
 
-### 2. Restart Claude
+### 3. Restart Claude Code
 
-After installing the plugin, **restart Claude Code** so it picks up the new skill.
+Close and reopen Claude Code so it picks up the new skill:
 
-### 3. Start the Game
+```bash
+claude
+```
+
+### 4. Start the game
+
+From any directory, run the slash command:
 
 ```
 /game-joke:play
 ```
 
-This launches the game server on `http://localhost:7331` and gives Claude the challenge prompt.
+This starts the puzzle server on `http://localhost:7331` and presents the challenge.
 
-### 4. Find The Joke
+### 5. Open the page in your browser
 
-The joke is split into **6 puzzles**, each hiding one or more words. They escalate in difficulty:
+Visit [http://localhost:7331](http://localhost:7331) in your browser to see the puzzle page. Read the challenge, look around, get a feel for it — but remember, you're not allowed to use dev tools or view source yourself. That's Claude's job.
+
+### 6. Start exploring
+
+Give Claude instructions to investigate the server. Here's a starter prompt to prove the connection works:
+
+```
+Fetch http://localhost:7331 and show me the page title and any text content you find.
+```
+
+From there, direct Claude to dig deeper. There are **6 puzzles** hidden across the server, each containing one or more words of the joke. They get progressively harder.
 
 | Puzzle | Difficulty | Hint |
 |--------|-----------|------|
@@ -65,9 +97,9 @@ The joke is split into **6 puzzles**, each hiding one or more words. They escala
 | 5 | Medium | Sometimes the mistakes ARE the message |
 | 6 | Hard | Some things only make sense when you run them |
 
-### 5. Assemble & Verify
+### 7. Assemble the joke
 
-Once you think you've found all the words, put the joke together. You'll know when you've got it — it's a proper joke with a punchline.
+Once you've found all the words, put them together. You'll know when you've got it — it's a proper joke with a punchline.
 
 ## Rules
 
@@ -78,6 +110,19 @@ Once you think you've found all the words, put the joke together. You'll know wh
 ## Fair Warning
 
 Not everything on the server is a clue. Some things are... distractions. If Claude starts waxing poetic or chasing shadows, it might be on the wrong track.
+
+## Stopping the Game
+
+Tell Claude to stop, quit, or exit, and it will shut down the server and end the session.
+
+## Cleanup
+
+When you're done with the game, uninstall the plugin and remove the marketplace:
+
+```bash
+claude plugin uninstall game-joke
+claude plugin marketplace remove claude-game-joke
+```
 
 Good luck. The joke is waiting.
 
