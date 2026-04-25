@@ -380,7 +380,7 @@ const HINTS_DATA = JSON.parse(Buffer.from(
 // Seriously, stop scrolling. Go play the game.
 // ============================================================================
 
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`\n  \u{1F0CF} Claude Game: The Joke`);
   console.log(`  ========================`);
   console.log(`  Server running at http://localhost:${PORT}`);
