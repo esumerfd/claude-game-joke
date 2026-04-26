@@ -21,7 +21,14 @@ The server script is at this path relative to this skill file:
 
 Resolve that path against the skill's base directory and tell the user:
 
-"To start the game server, run this command in your terminal:
+"
+  ____    _    __  __ _____     ___  _   _ 
+ / ___|  / \  |  \/  | ____|   / _ \| \ | |
+| |  _  / _ \ | |\/| |  _|   | | | |  \| |
+| |_| |/ ___ \| |  | | |___  | |_| | |\  |
+ \____/_/   \_\_|  |_|_____|  \___/|_| \_|
+
+To start the game server, run this command in your terminal:
 
 ```
 node <resolved-path-to-server.js>
