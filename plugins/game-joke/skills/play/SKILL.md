@@ -4,61 +4,39 @@ description: |
   Start the Claude Game: The Joke puzzle server and begin the challenge.
 
   Triggers: "play joke", "game joke", "start joke game", "play joke game"
-allowed-tools: "Read Bash(lsof:*) Bash(echo:*) AskUserQuestion TeamCreate SendMessage WebFetch(domain:localhost)"
+allowed-tools: "WebFetch(domain:localhost)"
 ---
 
 You are executing the `/game-joke:play` command to start the game.
 
-## Role Files
-
-- **Server agent:** [server.md](../_shared/roles/server.md)
-
----
-
 ## Workflow
 
-### STEP 1: Check environment variable
+### STEP 1: Tell the user to start the server
 
-Check if `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` is set to 1:
-
-```bash
-echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS
-```
-
-**If NOT set to 1:** Tell the user:
-
-"Agent teams are required for this game. Please set the environment variable by running: `export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in your shell, then restart Claude Code and run the command again."
-
-STOP execution.
-
-### STEP 2: Create the team
-
-```yaml
-TeamCreate:
-  team_name: "game-joke"
-  description: "Claude Game: The Joke"
-  agent_type: "team-lead"
-```
-
-You are the **lead**. You coordinate the game, interact with the player, and delegate to agents.
-
-### STEP 3: Spawn the server agent
-
-Read the server role file: [server.md](../_shared/roles/server.md)
-
-Spawn the server agent with instructions from the role file. Include the server script path — resolve it relative to this skill file:
+The server script is at this path relative to this skill file:
 
 ```
 ../../server/server.js
 ```
 
-Send the server agent the `START_SERVER` command with the resolved path.
+Resolve that path against the skill's base directory and tell the user:
 
-### STEP 4: Wait for server confirmation
+"To start the game server, run this command in your terminal:
 
-Wait for the server agent to report that the server is running. If it fails, tell the player and STOP.
+```
+node <resolved-path-to-server.js>
+```
 
-### STEP 5: Welcome the player
+Then let me know when it's running."
+
+### STEP 2: Verify the server is reachable
+
+Once the user says the server is running, fetch `http://localhost:7331` using `WebFetch`.
+
+- If the fetch succeeds: proceed to Step 3.
+- If the fetch fails: tell the user the server doesn't appear reachable and ask them to check it's running on port 7331.
+
+### STEP 3: Welcome the player
 
 Display this message:
 
@@ -79,14 +57,12 @@ Rules:
 Ready? Tell me to start exploring!
 ```
 
-### STEP 6: Game loop
+### STEP 4: Game loop
 
 Stay alive and wait for player instructions. You are the player's interface to the game. When they ask you to explore, fetch pages, call APIs, etc., do so using `WebFetch(domain:localhost)`.
 
 If the player says "stop", "quit", or "exit":
-1. Send the server agent the `STOP_SERVER` command
-2. Wait for confirmation
-3. Tell the player the game is over
-4. Delete the team
+1. Tell the player to stop the server by pressing `Ctrl+C` in their terminal.
+2. Tell the player the game is over.
 
 Do NOT solve puzzles automatically. Only act on player instructions.
