@@ -27,7 +27,7 @@ Resolve that path against the skill's base directory and tell the user:
 node <resolved-path-to-server.js>
 ```
 
-Then let me know when it's running."
+Then open http://localhost:7331 in your browser and let me know when it's running."
 
 ### STEP 2: Verify the server is reachable
 
